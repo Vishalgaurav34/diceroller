@@ -1,5 +1,4 @@
 services:
-  # Web service for the dice game
   - type: web
     name: dicee-battle-game
     env: node
@@ -11,8 +10,6 @@ services:
         value: production
       - key: SESSION_SECRET
         generateValue: true
-      # SMTP configuration for password reset emails
-      # Set these in Render dashboard for email functionality
       - key: SMTP_HOST
         sync: false
       - key: SMTP_PORT
@@ -25,34 +22,13 @@ services:
         value: "false"
       - key: FROM_EMAIL
         value: "noreply@dicee-battle.onrender.com"
-      # Performance optimizations
       - key: NODE_OPTIONS
         value: "--max-old-space-size=512"
-    # Health check endpoint
     healthCheckPath: /health
-    # Auto-deploy from main branch
     autoDeploy: true
-    # Disk space (for SQLite database in /tmp)
-    disk:
-      name: dicee-data
-      mountPath: /tmp
-      sizeGB: 1
-    # Custom headers for better security
-    headers:
-      - path: /*
-        name: X-Content-Type-Options
-        value: nosniff
-      - path: /*
-        name: X-Frame-Options
-        value: DENY
-      - path: /*
-        name: X-XSS-Protection
-        value: "1; mode=block"
 
-databases:
-  # SQLite database will be handled by the application
-  # Note: For production, consider using Render's PostgreSQL service
-  # - name: dicee-db
-  #   databaseName: dicee_game
-  #   user: dicee_user
-  #   plan: free
+# Removed:
+# - `disk` section: Not allowed in Free tier
+# - `headers`: Only supported for static sites (not dynamic Node apps)
+
+# databases section (commented) is fine as-is
