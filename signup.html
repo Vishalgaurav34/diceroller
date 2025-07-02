@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - Dicee Battle</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&family=Fredoka+One&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            animation: float 6s infinite ease-in-out;
+        }
+
+        .particle:nth-child(1) { left: 10%; animation-delay: 0s; }
+        .particle:nth-child(2) { left: 20%; animation-delay: 1s; }
+        .particle:nth-child(3) { left: 30%; animation-delay: 2s; }
+        .particle:nth-child(4) { left: 40%; animation-delay: 3s; }
+        .particle:nth-child(5) { left: 50%; animation-delay: 4s; }
+        .particle:nth-child(6) { left: 60%; animation-delay: 5s; }
+        .particle:nth-child(7) { left: 70%; animation-delay: 6s; }
+        .particle:nth-child(8) { left: 80%; animation-delay: 7s; }
+        .particle:nth-child(9) { left: 90%; animation-delay: 8s; }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(100vh) translateX(0px) rotate(0deg); opacity: 0; }
+            10%, 90% { opacity: 1; }
+            50% { transform: translateY(-10vh) translateX(50px) rotate(180deg); }
+        }
+
+        .auth-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            position: relative;
+            z-index: 10;
+        }
+
+        .auth-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .auth-title {
+            font-family: 'Fredoka One', cursive;
+            font-size: 2.5rem;
+            color: #fff;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .auth-subtitle {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1rem;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            color: #fff;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #fff;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .form-input::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #ffd700;
+            background: rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+        }
+
+        .form-input.error {
+            border-color: #f44336;
+            background: rgba(244, 67, 54, 0.1);
+        }
+
+        .auth-btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(45deg, #ffd700, #ffed4a);
+            border: none;
+            border-radius: 10px;
+            color: #333;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 15px;
+        }
+
+        .auth-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(255, 215, 0, 0.4);
+        }
+
+        .auth-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .auth-link {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .auth-link a {
+            color: #ffd700;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .auth-link a:hover {
+            text-decoration: underline;
+        }
+
+        .message {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: 500;
+            text-align: center;
+        }
+
+        .message.success {
+            background: rgba(76, 175, 80, 0.2);
+            border: 1px solid #4caf50;
+            color: #4caf50;
+        }
+
+        .message.error {
+            background: rgba(244, 67, 54, 0.2);
+            border: 1px solid #f44336;
+            color: #f44336;
+        }
+
+        .dice-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            animation: rotate 3s infinite linear;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .loading {
+            display: none;
+        }
+
+        .loading.show {
+            display: inline-block;
+            animation: spin 1s infinite linear;
+        }
+
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .password-strength {
+            margin-top: 5px;
+            font-size: 12px;
+        }
+
+        .strength-weak { color: #f44336; }
+        .strength-medium { color: #ff9800; }
+        .strength-strong { color: #4caf50; }
+    </style>
+</head>
+<body>
+    <div class="particles">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+    </div>
+
+    <div class="auth-container">
+        <div class="auth-header">
+            <div class="dice-icon">🎲</div>
+            <h1 class="auth-title">Join the Battle!</h1>
+            <p class="auth-subtitle">Create your account to start playing</p>
+        </div>
+
+        <div id="message"></div>
+
+        <form id="signupForm">
+            <div class="form-group">
+                <label class="form-label" for="username">
+                    <i class="fas fa-user"></i> Username
+                </label>
+                <input type="text" id="username" name="username" class="form-input" placeholder="Choose a username" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="email">
+                    <i class="fas fa-envelope"></i> Email
+                </label>
+                <input type="email" id="email" name="email" class="form-input" placeholder="Enter your email" required>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="password">
+                    <i class="fas fa-lock"></i> Password
+                </label>
+                <input type="password" id="password" name="password" class="form-input" placeholder="Create a password" required>
+                <div id="passwordStrength" class="password-strength"></div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="confirmPassword">
+                    <i class="fas fa-lock"></i> Confirm Password
+                </label>
+                <input type="password" id="confirmPassword" name="confirmPassword" class="form-input" placeholder="Confirm your password" required>
+            </div>
+
+            <button type="submit" class="auth-btn" id="signupBtn">
+                <i class="fas fa-user-plus"></i>
+                <span id="btnText">Create Account</span>
+                <i class="fas fa-spinner loading" id="spinner"></i>
+            </button>
+        </form>
+
+        <div class="auth-link">
+            Already have an account? <a href="/login.html">Log in here</a>
+        </div>
+    </div>
+
+    <script>
+        const signupForm = document.getElementById('signupForm');
+        const messageDiv = document.getElementById('message');
+        const signupBtn = document.getElementById('signupBtn');
+        const btnText = document.getElementById('btnText');
+        const spinner = document.getElementById('spinner');
+        const passwordInput = document.getElementById('password');
+        const confirmPasswordInput = document.getElementById('confirmPassword');
+        const passwordStrengthDiv = document.getElementById('passwordStrength');
+
+        function showMessage(message, type) {
+            messageDiv.innerHTML = `<div class="message ${type}">${message}</div>`;
+        }
+
+        function setLoading(loading) {
+            signupBtn.disabled = loading;
+            if (loading) {
+                btnText.style.display = 'none';
+                spinner.classList.add('show');
+            } else {
+                btnText.style.display = 'inline';
+                spinner.classList.remove('show');
+            }
+        }
+
+        function checkPasswordStrength(password) {
+            let strength = 'weak';
+            let message = '';
+
+            if (password.length < 6) {
+                message = 'Password must be at least 6 characters';
+                strength = 'weak';
+            } else if (password.length < 8) {
+                message = 'Weak password';
+                strength = 'weak';
+            } else if (password.match(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)) {
+                message = 'Strong password';
+                strength = 'strong';
+            } else {
+                message = 'Medium password';
+                strength = 'medium';
+            }
+
+            passwordStrengthDiv.textContent = message;
+            passwordStrengthDiv.className = `password-strength strength-${strength}`;
+        }
+
+        function validatePasswords() {
+            const password = passwordInput.value;
+            const confirmPassword = confirmPasswordInput.value;
+
+            if (confirmPassword && password !== confirmPassword) {
+                confirmPasswordInput.classList.add('error');
+                return false;
+            } else {
+                confirmPasswordInput.classList.remove('error');
+                return true;
+            }
+        }
+
+        passwordInput.addEventListener('input', (e) => {
+            checkPasswordStrength(e.target.value);
+            validatePasswords();
+        });
+
+        confirmPasswordInput.addEventListener('input', validatePasswords);
+
+        signupForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (!validatePasswords()) {
+                showMessage('Passwords do not match', 'error');
+                return;
+            }
+
+            const formData = new FormData(signupForm);
+            const data = {
+                username: formData.get('username'),
+                email: formData.get('email'),
+                password: formData.get('password')
+            };
+
+            if (data.password.length < 6) {
+                showMessage('Password must be at least 6 characters', 'error');
+                return;
+            }
+
+            setLoading(true);
+            messageDiv.innerHTML = '';
+
+            try {
+                const response = await fetch('/api/signup', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showMessage('Account created successfully! Redirecting...', 'success');
+                    setTimeout(() => {
+                        window.location.href = '/game.html';
+                    }, 1000);
+                } else {
+                    showMessage(result.message, 'error');
+                    setLoading(false);
+                }
+            } catch (error) {
+                showMessage('An error occurred. Please try again.', 'error');
+                setLoading(false);
+            }
+        });
+    </script>
+</body>
+</html>

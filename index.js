@@ -360,8 +360,50 @@ confettiStyle.textContent = `
 `;
 document.head.appendChild(confettiStyle);
 
+// Authentication functions
+async function loadUserInfo() {
+    try {
+        const response = await fetch('/api/user');
+        const result = await response.json();
+        
+        if (result.success) {
+            document.getElementById('welcomeUser').textContent = `Welcome, ${result.user.username}!`;
+        }
+    } catch (error) {
+        console.error('Error loading user info:', error);
+    }
+}
+
+async function logout() {
+    try {
+        const response = await fetch('/api/logout', {
+            method: 'POST'
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            window.location.href = '/login.html';
+        }
+    } catch (error) {
+        console.error('Error logging out:', error);
+    }
+}
+
+// Setup logout button
+function setupAuthListeners() {
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', logout);
+    }
+}
+
 // Initialize the game when page loads
-document.addEventListener('DOMContentLoaded', initGame);
+document.addEventListener('DOMContentLoaded', () => {
+    initGame();
+    loadUserInfo();
+    setupAuthListeners();
+});
 
 // Add some Easter eggs
 let konamiCode = [];
