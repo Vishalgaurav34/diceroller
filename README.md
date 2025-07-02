@@ -1,116 +1,205 @@
-# 🎲 Dicee Battle - Multiplayer Dice Game with Authentication
+# 🎲 Dicee Battle - Ultimate Dice Game
 
-A modern, interactive dice game with user authentication, beautiful UI, and SQLite database integration.
+A modern, full-featured dice battle game with user authentication, real-time statistics, and beautiful animations. Built with Node.js, Express, and vanilla JavaScript.
 
-## ✨ Features
+![Dicee Battle](https://img.shields.io/badge/Game-Dicee%20Battle-blue?style=for-the-badge&logo=game)
+![Node.js](https://img.shields.io/badge/Node.js-v16+-green?style=for-the-badge&logo=node.js)
+![Express](https://img.shields.io/badge/Express-4.18+-blue?style=for-the-badge&logo=express)
+![SQLite](https://img.shields.io/badge/SQLite-3.0+-orange?style=for-the-badge&logo=sqlite)
 
-- **User Authentication**: Secure login and signup system
-- **SQLite Database**: Stores user information securely with bcrypt password hashing
-- **Modern UI**: Beautiful, responsive design with animations and particle effects
-- **Real-time Game**: Interactive dice rolling with sound effects and animations
-- **Session Management**: Secure session handling with Express sessions
-- **Game Statistics**: Track wins, losses, and draws
-- **Responsive Design**: Works perfectly on desktop and mobile devices
+## 🌟 Features
 
-## 🚀 Quick Start
+### 🎮 Game Features
+- **Interactive Dice Rolling**: Beautiful animated dice with realistic physics
+- **Score Tracking**: Real-time score updates with visual effects
+- **Round Counter**: Track game progress with detailed round information
+- **Winner Animations**: Celebratory effects with particles and crown displays
+- **Game Statistics**: Persistent player statistics across sessions
+- **Keyboard Controls**: Space to roll, R to reset for enhanced gameplay
 
-### Prerequisites
+### 🔐 Authentication System
+- **User Registration**: Secure account creation with validation
+- **Login System**: Session-based authentication with persistent sessions
+- **Password Reset**: Email-based password recovery system
+- **Session Management**: Secure session handling with auto-logout
+- **Input Validation**: Comprehensive client and server-side validation
 
-- Node.js (version 14 or higher)
-- npm (comes with Node.js)
+### 🎨 Modern UI/UX
+- **Responsive Design**: Works perfectly on desktop, tablet, and mobile
+- **Gradient Backgrounds**: Beautiful animated gradient backgrounds
+- **Floating Particles**: Dynamic particle effects for immersion
+- **Smooth Animations**: CSS transitions and keyframe animations
+- **Modern Typography**: Clean, readable fonts with proper hierarchy
+- **Visual Feedback**: Loading states, success/error messages
 
-### Installation
+### 🚀 Performance & Security
+- **Compression**: Gzip compression for faster loading
+- **Caching**: Static file caching for improved performance
+- **Security Headers**: XSS protection, content type validation
+- **Input Sanitization**: SQL injection and XSS prevention
+- **Session Security**: HTTP-only cookies, CSRF protection
 
-1. **Clone or download the project files**
+## 📋 Prerequisites
 
-2. **Install dependencies**:
+- **Node.js**: Version 16.0 or higher
+- **NPM**: Version 8.0 or higher
+- **Email Service** (optional): For password reset functionality
+
+## 🛠️ Installation & Setup
+
+### Local Development
+
+1. **Clone the repository**
+   ```bash
+   git clone <your-repo-url>
+   cd dicee-battle-game
+   ```
+
+2. **Install dependencies**
    ```bash
    npm install
    ```
 
-3. **Start the server**:
+3. **Start the development server**
+   ```bash
+   npm run dev
+   ```
+
+4. **Access the application**
+   - Open your browser and navigate to `http://localhost:3000`
+   - Create an account or log in to start playing
+
+### Production Setup
+
+1. **Install dependencies**
+   ```bash
+   npm install --production
+   ```
+
+2. **Set environment variables**
+   ```bash
+   export NODE_ENV=production
+   export SESSION_SECRET=your-super-secret-session-key
+   # Optional: For email functionality
+   export SMTP_HOST=your-smtp-host
+   export SMTP_USER=your-email@domain.com
+   export SMTP_PASS=your-email-password
+   export FROM_EMAIL=noreply@yourdomain.com
+   ```
+
+3. **Start the server**
    ```bash
    npm start
    ```
 
-4. **Open your browser** and navigate to:
+## 🌐 Render.com Deployment
+
+This application is optimized for deployment on Render.com with zero configuration required.
+
+### Automatic Deployment
+
+1. **Connect your repository** to Render.com
+2. **Select "Web Service"** as the service type
+3. **Use the included `render.yaml`** configuration (automatic detection)
+4. **Deploy** - Render will automatically:
+   - Install dependencies
+   - Set up the database
+   - Configure environment variables
+   - Start the application
+
+### Manual Deployment
+
+1. **Create a new Web Service** on Render.com
+2. **Configure the service**:
+   - **Build Command**: `npm install`
+   - **Start Command**: `npm start`
+   - **Environment**: Node
+   - **Plan**: Free (or higher for production)
+
+3. **Set Environment Variables**:
    ```
-   http://localhost:3000
+   NODE_ENV=production
+   SESSION_SECRET=<auto-generated>
+   SMTP_HOST=<your-smtp-host>
+   SMTP_USER=<your-email>
+   SMTP_PASS=<your-password>
+   FROM_EMAIL=noreply@yourdomain.com
    ```
 
-### For Development
+4. **Deploy** and access your application at the provided URL
 
-To run the server with auto-restart on file changes:
-```bash
-npm run dev
-```
+### Email Configuration
 
-## 🎮 How to Play
+For password reset functionality, configure SMTP settings in Render dashboard:
 
-1. **Sign Up**: Create a new account with username, email, and password
-2. **Login**: Use your credentials to access the game
-3. **Roll Dice**: Click the "Roll Dice" button to play
-4. **Win Rounds**: Higher dice roll wins the round and earns points
-5. **Game Victory**: First player to reach 50 points wins the game
-6. **Track Stats**: View your game statistics and performance
+**Gmail SMTP** (recommended for testing):
+- SMTP_HOST: `smtp.gmail.com`
+- SMTP_PORT: `587`
+- SMTP_SECURE: `false`
+- SMTP_USER: `your-gmail@gmail.com`
+- SMTP_PASS: `your-app-password` (not your regular password)
 
-## 🛠 Technology Stack
-
-### Backend
-- **Node.js**: Runtime environment
-- **Express.js**: Web framework
-- **SQLite3**: Database for user storage
-- **bcryptjs**: Password hashing
-- **express-session**: Session management
-- **body-parser**: Request parsing
-
-### Frontend
-- **HTML5**: Structure and semantics
-- **CSS3**: Modern styling with animations
-- **JavaScript (ES6+)**: Interactive gameplay
-- **Font Awesome**: Icons
-- **Google Fonts**: Typography (Poppins, Fredoka One)
+**Other providers**:
+- **SendGrid**: Professional email service
+- **Mailgun**: Developer-friendly email API
+- **AWS SES**: Cost-effective enterprise solution
 
 ## 📁 Project Structure
 
 ```
-dicee-game-auth/
-├── server.js          # Main server file
-├── package.json       # Dependencies and scripts
-├── users.db          # SQLite database (auto-created)
-├── index.html        # Game page (protected)
-├── login.html        # Login page
-├── signup.html       # Signup page
-├── index.js          # Game logic
-├── styles.css        # Game styles
-├── images/           # Dice images
-│   ├── dice1.png
-│   ├── dice2.png
-│   ├── dice3.png
-│   ├── dice4.png
-│   ├── dice5.png
-│   └── dice6.png
-└── README.md         # This file
+dicee-battle-game/
+├── 📄 server.js                 # Main server file
+├── 📄 index.html                # Game interface
+├── 📄 login.html                # Login page
+├── 📄 signup.html               # Registration page
+├── 📄 forgot-password.html      # Password reset request
+├── 📄 reset-password.html       # Password reset form
+├── 📄 index.js                  # Game logic & interactions
+├── 📄 styles.css                # Styling & animations
+├── 📄 package.json              # Dependencies & scripts
+├── 📄 render.yaml               # Render.com configuration
+├── 📁 images/                   # Dice images
+│   ├── dice1.png               # Dice face 1
+│   ├── dice2.png               # Dice face 2
+│   ├── dice3.png               # Dice face 3
+│   ├── dice4.png               # Dice face 4
+│   ├── dice5.png               # Dice face 5
+│   └── dice6.png               # Dice face 6
+└── 📄 users.db                  # SQLite database (auto-created)
 ```
 
-## 🔐 Security Features
+## 🎮 How to Play
 
-- **Password Hashing**: Uses bcrypt with salt rounds for secure password storage
-- **Session Management**: Secure session handling with Express sessions
-- **SQL Injection Protection**: Parameterized queries prevent SQL injection
-- **Input Validation**: Server-side validation for all user inputs
-- **Authentication Middleware**: Protects game routes from unauthorized access
+1. **Create Account**: Register with username, email, and password
+2. **Login**: Access your personal game dashboard
+3. **Roll Dice**: Click "Roll Dice" or press spacebar
+4. **Score Points**: Higher roll wins points equal to the roll value
+5. **Track Progress**: View real-time statistics and game history
+6. **Win Condition**: First to reach 50 points wins the game
+7. **New Game**: Reset anytime with the "New Game" button
 
-## 🎨 Customization
+## 🔧 API Endpoints
 
-### Changing Game Rules
-Edit the `checkGameWinner()` function in `index.js` to modify the winning score (default: 50 points).
+### Authentication
+- `POST /api/signup` - User registration
+- `POST /api/login` - User login
+- `POST /api/logout` - User logout
+- `GET /api/user` - Get current user info
 
-### Styling
-Modify `styles.css` to customize colors, animations, and layout.
+### Game Management
+- `GET /api/stats` - Get user's game statistics
+- `POST /api/stats` - Save game statistics
 
-### Database
-The SQLite database is automatically created with the following schema:
+### Password Recovery
+- `POST /api/forgot-password` - Request password reset
+- `POST /api/reset-password` - Reset password with token
+
+### System
+- `GET /health` - Health check endpoint
+
+## 📊 Database Schema
+
+### Users Table
 ```sql
 CREATE TABLE users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -121,104 +210,119 @@ CREATE TABLE users (
 );
 ```
 
-## 🌐 API Endpoints
-
-- `POST /api/signup` - Create new user account
-- `POST /api/login` - Authenticate user
-- `POST /api/logout` - End user session
-- `GET /api/user` - Get current user info
-- `GET /` - Redirect to appropriate page
-- `GET /game.html` - Protected game page
-- `GET /login.html` - Login page
-- `GET /signup.html` - Signup page
-
-## 🔧 Troubleshooting
-
-### Port Already in Use
-If port 3000 is busy, modify the `PORT` variable in `server.js`:
-```javascript
-const PORT = 3001; // Change to available port
+### Game Statistics Table
+```sql
+CREATE TABLE game_stats (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    player1_wins INTEGER DEFAULT 0,
+    player2_wins INTEGER DEFAULT 0,
+    draws INTEGER DEFAULT 0,
+    total_games INTEGER DEFAULT 0,
+    FOREIGN KEY (user_id) REFERENCES users (id)
+);
 ```
 
-### Database Issues
-Delete `users.db` file and restart the server to recreate the database.
+### Password Resets Table
+```sql
+CREATE TABLE password_resets (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    token TEXT UNIQUE NOT NULL,
+    expires_at DATETIME NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES users (id)
+);
+```
 
-### Dependencies Not Installing
-Try:
+## 🔒 Security Features
+
+- **Password Hashing**: bcryptjs with 12 salt rounds
+- **Session Security**: HTTP-only cookies, SameSite protection
+- **Input Validation**: Server and client-side validation
+- **SQL Injection Prevention**: Parameterized queries
+- **XSS Protection**: Content sanitization
+- **CSRF Protection**: SameSite cookie configuration
+- **Rate Limiting**: Natural rate limiting through game mechanics
+
+## 🚀 Performance Optimizations
+
+- **Compression**: Gzip compression for all responses
+- **Static Caching**: Browser caching for static assets
+- **Database Optimization**: Indexed queries and connection pooling
+- **Memory Management**: Optimized garbage collection
+- **Minification**: CSS and JavaScript optimization
+- **CDN Assets**: External font and icon libraries
+
+## 🛠️ Troubleshooting
+
+### Common Issues
+
+**1. Database Connection Errors**
 ```bash
-npm cache clean --force
-npm install
+# Ensure write permissions
+chmod 755 .
+chmod 644 users.db
 ```
 
-## 📱 Mobile Support
+**2. Email Not Sending**
+- Verify SMTP environment variables
+- Check firewall settings
+- Use app-specific passwords for Gmail
 
-The game is fully responsive and optimized for mobile devices with:
-- Touch-friendly buttons
-- Responsive grid layout
-- Optimized animations for mobile performance
-- Adaptive text sizing
+**3. Session Issues**
+- Clear browser cookies
+- Check SESSION_SECRET environment variable
+- Restart the server
 
-## 🚀 Deployment
+**4. Static Files Not Loading**
+- Verify file paths are correct
+- Check image files exist in `/images` directory
+- Ensure proper MIME types
 
-### Deploy to Render
+### Development Debugging
 
-This project includes a `render.yaml` file for easy deployment to Render:
+**Enable Debug Mode**:
+```bash
+DEBUG=* npm run dev
+```
 
-1. **Push your code** to a GitHub repository
-2. **Connect to Render**:
-   - Go to [render.com](https://render.com)
-   - Sign up/login and connect your GitHub account
-   - Click "New" → "Blueprint"
-   - Select your repository
-3. **Deploy**: Render will automatically use the `render.yaml` configuration
-4. **Access your app**: Your app will be available at the provided Render URL
+**Check Logs**:
+- Server logs in console
+- Browser developer tools
+- Network tab for API requests
 
-### Manual Deployment Steps
+## 🤝 Contributing
 
-If deploying manually:
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-1. **Create a Web Service** on Render
-2. **Connect your repository**
-3. **Configure build settings**:
-   - Build Command: `npm install`
-   - Start Command: `node server.js`
-4. **Set environment variables**:
-   - `NODE_ENV`: `production`
-   - `SESSION_SECRET`: (generate a secure random string)
-5. **Deploy**
+## � License
 
-### Environment Variables
-
-For production deployment, make sure to set:
-- `NODE_ENV=production`
-- `SESSION_SECRET` (secure random string)
-- `PORT` (automatically set by most hosting platforms)
-
-### Production Considerations
-
-- SQLite database is suitable for small applications
-- For larger scale, consider upgrading to PostgreSQL
-- The app automatically handles HTTPS redirects in production
-- Session cookies are secured automatically in production mode
-
-## 🎯 Future Enhancements
-
-- [ ] Multiplayer support with WebSockets
-- [ ] User profiles and avatars
-- [ ] Tournament mode
-- [ ] Sound effects
-- [ ] Leaderboards
-- [ ] Social sharing
-- [ ] Progressive Web App (PWA) features
-
-## 📄 License
-
-MIT License - Feel free to use and modify for your projects.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## 👨‍💻 Author
 
-**Vishal Gowrav** - Enhanced with modern UI and authentication system
+**Vishal Gowrav**
+- Enhanced with modern UI/UX design
+- Optimized for performance and security
+- Deployed on Render.com
+
+## 🎉 Acknowledgments
+
+- Dice images from public domain resources
+- Font Awesome for beautiful icons
+- Google Fonts for typography
+- Render.com for hosting platform
 
 ---
 
-Enjoy playing Dicee Battle! 🎲✨
+<div align="center">
+
+**🎲 Ready to Roll? [Play Now!](https://your-app-url.onrender.com) 🎲**
+
+Made with ❤️ and ☕ by Vishal Gowrav
+
+</div>

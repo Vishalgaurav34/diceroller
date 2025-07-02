@@ -10,8 +10,19 @@ const crypto = require('crypto');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// Database setup
-const db = new sqlite3.Database('./users.db');
+// Add compression for better performance
+const compression = require('compression');
+app.use(compression());
+
+// Database setup with better error handling
+const dbPath = process.env.NODE_ENV === 'production' ? '/tmp/users.db' : './users.db';
+const db = new sqlite3.Database(dbPath, (err) => {
+  if (err) {
+    console.error('Error opening database:', err.message);
+  } else {
+    console.log('Connected to SQLite database');
+  }
+});
 
 // Create users table if it doesn't exist
 db.serialize(() => {
@@ -51,18 +62,37 @@ db.serialize(() => {
 // Middleware
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+
+// Enhanced session configuration for production
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'dicee-game-secret-key',
+  secret: process.env.SESSION_SECRET || 'dicee-game-secret-key-change-in-production',
   resave: false,
   saveUninitialized: false,
   cookie: { 
-    secure: process.env.NODE_ENV === 'production', // Use HTTPS in production
-    maxAge: 24 * 60 * 60 * 1000 // 24 hours
-  }
+    secure: process.env.NODE_ENV === 'production' && process.env.HTTPS === 'true',
+    maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    httpOnly: true,
+    sameSite: 'lax'
+  },
+  name: 'dicee.sid' // Custom session name
 }));
 
-// Serve static files
-app.use(express.static(__dirname));
+// Serve static files with better caching
+app.use(express.static(__dirname, {
+  maxAge: process.env.NODE_ENV === 'production' ? '1d' : 0,
+  etag: true
+}));
+
+// Add security headers
+app.use((req, res, next) => {
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  if (process.env.NODE_ENV === 'production') {
+    res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+  }
+  next();
+});
 
 // Authentication middleware
 function requireAuth(req, res, next) {
@@ -72,6 +102,15 @@ function requireAuth(req, res, next) {
     res.redirect('/login.html');
   }
 }
+
+// Health check endpoint for render.com
+app.get('/health', (req, res) => {
+  res.status(200).json({ 
+    status: 'OK', 
+    timestamp: new Date().toISOString(),
+    uptime: process.uptime()
+  });
+});
 
 // Routes
 app.get('/', (req, res) => {
@@ -106,43 +145,59 @@ app.get('/signup.html', (req, res) => {
 app.post('/api/signup', async (req, res) => {
   const { username, email, password } = req.body;
 
+  // Enhanced validation
   if (!username || !email || !password) {
     return res.json({ success: false, message: 'All fields are required' });
+  }
+
+  if (username.length < 3) {
+    return res.json({ success: false, message: 'Username must be at least 3 characters' });
   }
 
   if (password.length < 6) {
     return res.json({ success: false, message: 'Password must be at least 6 characters' });
   }
 
-  // Basic email format validation
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
+  // Enhanced email validation
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
   if (!emailRegex.test(email)) {
-    return res.json({ success: false, message: 'Invalid email address' });
+    return res.json({ success: false, message: 'Please enter a valid email address' });
   }
 
   try {
-    const hashedPassword = await bcrypt.hash(password, 10);
+    const hashedPassword = await bcrypt.hash(password, 12); // Increased salt rounds
     
     db.run('INSERT INTO users (username, email, password) VALUES (?, ?, ?)', 
-      [username, email, hashedPassword], 
+      [username.trim(), email.toLowerCase().trim(), hashedPassword], 
       function(err) {
         if (err) {
+          console.error('Signup error:', err);
           if (err.message.includes('UNIQUE constraint failed: users.username')) {
-            res.json({ success: false, message: 'Username already exists' });
+            res.json({ success: false, message: 'Username already exists. Please choose a different one.' });
           } else if (err.message.includes('UNIQUE constraint failed: users.email')) {
-            res.json({ success: false, message: 'Email already exists' });
+            res.json({ success: false, message: 'Email already registered. Please use a different email or try logging in.' });
           } else {
-            res.json({ success: false, message: 'Error creating account' });
+            res.json({ success: false, message: 'Error creating account. Please try again.' });
           }
         } else {
+          // Set session data
           req.session.userId = this.lastID;
-          req.session.username = username;
-          res.json({ success: true, message: 'Account created successfully' });
+          req.session.username = username.trim();
+          
+          // Save session before responding
+          req.session.save((err) => {
+            if (err) {
+              console.error('Session save error:', err);
+              res.json({ success: false, message: 'Account created but login failed. Please try logging in.' });
+            } else {
+              res.json({ success: true, message: 'Account created successfully!' });
+            }
+          });
         }
       });
   } catch (error) {
-    res.json({ success: false, message: 'Error creating account' });
+    console.error('Signup hash error:', error);
+    res.json({ success: false, message: 'Error creating account. Please try again.' });
   }
 });
 
@@ -153,27 +208,49 @@ app.post('/api/login', (req, res) => {
     return res.json({ success: false, message: 'Username and password are required' });
   }
 
-  db.get('SELECT * FROM users WHERE username = ?', [username], async (err, user) => {
+  db.get('SELECT * FROM users WHERE username = ? OR email = ?', [username.trim(), username.toLowerCase().trim()], async (err, user) => {
     if (err) {
-      res.json({ success: false, message: 'Error logging in' });
+      console.error('Login error:', err);
+      res.json({ success: false, message: 'Error logging in. Please try again.' });
     } else if (!user) {
-      res.json({ success: false, message: 'Invalid username or password' });
+      res.json({ success: false, message: 'Invalid username/email or password' });
     } else {
-      const validPassword = await bcrypt.compare(password, user.password);
-      if (validPassword) {
-        req.session.userId = user.id;
-        req.session.username = user.username;
-        res.json({ success: true, message: 'Login successful' });
-      } else {
-        res.json({ success: false, message: 'Invalid username or password' });
+      try {
+        const validPassword = await bcrypt.compare(password, user.password);
+        if (validPassword) {
+          req.session.userId = user.id;
+          req.session.username = user.username;
+          
+          // Save session before responding
+          req.session.save((err) => {
+            if (err) {
+              console.error('Session save error:', err);
+              res.json({ success: false, message: 'Login failed. Please try again.' });
+            } else {
+              res.json({ success: true, message: 'Login successful!' });
+            }
+          });
+        } else {
+          res.json({ success: false, message: 'Invalid username/email or password' });
+        }
+      } catch (error) {
+        console.error('Password comparison error:', error);
+        res.json({ success: false, message: 'Error logging in. Please try again.' });
       }
     }
   });
 });
 
 app.post('/api/logout', (req, res) => {
-  req.session.destroy();
-  res.json({ success: true, message: 'Logged out successfully' });
+  req.session.destroy((err) => {
+    if (err) {
+      console.error('Logout error:', err);
+      res.json({ success: false, message: 'Error logging out' });
+    } else {
+      res.clearCookie('dicee.sid');
+      res.json({ success: true, message: 'Logged out successfully' });
+    }
+  });
 });
 
 app.get('/api/user', requireAuth, (req, res) => {
@@ -192,6 +269,7 @@ app.get('/api/stats', requireAuth, (req, res) => {
   
   db.get('SELECT * FROM game_stats WHERE user_id = ?', [userId], (err, stats) => {
     if (err) {
+      console.error('Stats fetch error:', err);
       res.json({ success: false, message: 'Error fetching stats' });
     } else if (!stats) {
       // Create default stats for new user
@@ -235,6 +313,7 @@ app.post('/api/stats', requireAuth, (req, res) => {
     [userId, player1Wins, player2Wins, draws, totalGames], 
     function(err) {
       if (err) {
+        console.error('Stats save error:', err);
         res.json({ success: false, message: 'Error saving stats' });
       } else {
         res.json({ success: true, message: 'Stats saved successfully' });
@@ -246,19 +325,46 @@ app.post('/api/stats', requireAuth, (req, res) => {
 // Forgot / Reset Password Flow
 // =============================
 
-// Create a reusable transporter if SMTP env variables are provided
+// Enhanced SMTP configuration with fallback
 let transporter = null;
-if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
-  transporter = nodemailer.createTransport({
-    host: process.env.SMTP_HOST,
-    port: process.env.SMTP_PORT ? Number(process.env.SMTP_PORT) : 587,
-    secure: process.env.SMTP_SECURE === 'true',
-    auth: {
-      user: process.env.SMTP_USER,
-      pass: process.env.SMTP_PASS
+
+// Initialize email transporter
+function initializeEmailTransporter() {
+  if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
+    try {
+      transporter = nodemailer.createTransporter({
+        host: process.env.SMTP_HOST,
+        port: parseInt(process.env.SMTP_PORT) || 587,
+        secure: process.env.SMTP_SECURE === 'true',
+        auth: {
+          user: process.env.SMTP_USER,
+          pass: process.env.SMTP_PASS
+        },
+        tls: {
+          rejectUnauthorized: false
+        }
+      });
+      
+      // Verify connection
+      transporter.verify((error, success) => {
+        if (error) {
+          console.error('Email configuration error:', error);
+          transporter = null;
+        } else {
+          console.log('Email server is ready to send messages');
+        }
+      });
+    } catch (error) {
+      console.error('Error initializing email transporter:', error);
+      transporter = null;
     }
-  });
+  } else {
+    console.warn('SMTP environment variables not set. Email functionality will not work.');
+  }
 }
+
+// Initialize on startup
+initializeEmailTransporter();
 
 // Request password reset
 app.post('/api/forgot-password', (req, res) => {
@@ -268,22 +374,26 @@ app.post('/api/forgot-password', (req, res) => {
     return res.json({ success: false, message: 'Email is required' });
   }
 
-  // Validate email format quickly
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  // Validate email format
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
   if (!emailRegex.test(email)) {
-    return res.json({ success: false, message: 'Invalid email format' });
+    return res.json({ success: false, message: 'Please enter a valid email address' });
   }
 
-  db.get('SELECT id, username FROM users WHERE email = ?', [email], (err, user) => {
+  db.get('SELECT id, username FROM users WHERE email = ?', [email.toLowerCase().trim()], (err, user) => {
     if (err) {
-      return res.json({ success: false, message: 'Database error' });
+      console.error('Database error in forgot password:', err);
+      return res.json({ success: false, message: 'Database error occurred' });
     }
+
+    // Always return success message for security (don't reveal if email exists)
+    const successMessage = 'If that email is registered, a reset link has been sent';
 
     if (!user) {
-      return res.json({ success: true, message: 'If that email is registered, a reset link has been sent' });
+      return res.json({ success: true, message: successMessage });
     }
 
-    // Generate token
+    // Generate secure token
     const token = crypto.randomBytes(32).toString('hex');
     const expiresAt = new Date(Date.now() + 60 * 60 * 1000).toISOString(); // 1 hour expiry
 
@@ -293,6 +403,7 @@ app.post('/api/forgot-password', (req, res) => {
             ON CONFLICT(user_id) DO UPDATE SET token = excluded.token, expires_at = excluded.expires_at`,
       [user.id, token, expiresAt], (err2) => {
         if (err2) {
+          console.error('Error generating reset token:', err2);
           return res.json({ success: false, message: 'Error generating reset link' });
         }
 
@@ -300,23 +411,46 @@ app.post('/api/forgot-password', (req, res) => {
 
         if (transporter) {
           const mailOptions = {
-            from: process.env.FROM_EMAIL || 'no-reply@example.com',
+            from: process.env.FROM_EMAIL || '"Dicee Battle" <no-reply@dicee-battle.com>',
             to: email,
-            subject: 'Password Reset Request',
-            text: `Hello ${user.username},\n\nYou requested a password reset for your Dicee Battle account. Click the link below to reset your password: \n${resetLink}\n\nThis link will expire in 1 hour.\n\nIf you did not request this, please ignore this email.`,
-            html: `<p>Hello <strong>${user.username}</strong>,</p><p>You requested a password reset for your Dicee Battle account.</p><p><a href="${resetLink}">Click here to reset your password</a></p><p>This link will expire in 1 hour.</p><p>If you did not request this, please ignore this email.</p>`
+            subject: 'Password Reset Request - Dicee Battle',
+            text: `Hello ${user.username},\n\nYou requested a password reset for your Dicee Battle account.\n\nClick the link below to reset your password:\n${resetLink}\n\nThis link will expire in 1 hour.\n\nIf you did not request this, please ignore this email.\n\nBest regards,\nDicee Battle Team`,
+            html: `
+              <div style="font-family: 'Poppins', Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 10px;">
+                <div style="background: white; padding: 30px; border-radius: 10px; text-align: center;">
+                  <h1 style="color: #333; margin-bottom: 20px;">🎲 Dicee Battle</h1>
+                  <h2 style="color: #667eea; margin-bottom: 20px;">Password Reset Request</h2>
+                  <p style="color: #666; font-size: 16px; line-height: 1.6; margin-bottom: 20px;">
+                    Hello <strong>${user.username}</strong>,
+                  </p>
+                  <p style="color: #666; font-size: 16px; line-height: 1.6; margin-bottom: 30px;">
+                    You requested a password reset for your Dicee Battle account. Click the button below to reset your password:
+                  </p>
+                  <a href="${resetLink}" style="display: inline-block; background: linear-gradient(45deg, #ff6b6b, #ee5a24); color: white; padding: 15px 30px; text-decoration: none; border-radius: 50px; font-weight: bold; font-size: 16px;">Reset Password</a>
+                  <p style="color: #999; font-size: 14px; margin-top: 30px; line-height: 1.6;">
+                    This link will expire in 1 hour. If you did not request this, please ignore this email.
+                  </p>
+                  <p style="color: #999; font-size: 12px; margin-top: 20px;">
+                    If the button doesn't work, copy and paste this link into your browser:<br>
+                    <span style="word-break: break-all;">${resetLink}</span>
+                  </p>
+                </div>
+              </div>
+            `
           };
 
-          transporter.sendMail(mailOptions, (err3) => {
+          transporter.sendMail(mailOptions, (err3, info) => {
             if (err3) {
               console.error('Error sending email:', err3);
+              return res.json({ success: false, message: 'Error sending reset email. Please try again later.' });
             }
+            console.log('Password reset email sent:', info.response);
+            res.json({ success: true, message: successMessage });
           });
         } else {
           console.log('Password reset link (email not configured):', resetLink);
+          res.json({ success: false, message: 'Email service is not configured. Please contact support.' });
         }
-
-        res.json({ success: true, message: 'If that email is registered, a reset link has been sent' });
       });
   });
 });
@@ -335,40 +469,58 @@ app.post('/api/reset-password', async (req, res) => {
 
   db.get('SELECT * FROM password_resets WHERE token = ?', [token], async (err, resetRow) => {
     if (err) {
-      return res.json({ success: false, message: 'Database error' });
+      console.error('Database error in reset password:', err);
+      return res.json({ success: false, message: 'Database error occurred' });
     }
 
     if (!resetRow) {
-      return res.json({ success: false, message: 'Invalid or expired token' });
+      return res.json({ success: false, message: 'Invalid or expired reset token' });
     }
 
     // Check expiry
     if (new Date(resetRow.expires_at) < new Date()) {
       // Delete expired token
       db.run('DELETE FROM password_resets WHERE id = ?', [resetRow.id]);
-      return res.json({ success: false, message: 'Token has expired' });
+      return res.json({ success: false, message: 'Reset token has expired. Please request a new one.' });
     }
 
     // Hash new password
     try {
-      const hashedPassword = await bcrypt.hash(password, 10);
+      const hashedPassword = await bcrypt.hash(password, 12);
 
       db.run('UPDATE users SET password = ? WHERE id = ?', [hashedPassword, resetRow.user_id], function(err2) {
         if (err2) {
+          console.error('Error updating password:', err2);
           return res.json({ success: false, message: 'Error updating password' });
         }
 
         // Delete token after successful reset
         db.run('DELETE FROM password_resets WHERE id = ?', [resetRow.id]);
 
-        res.json({ success: true, message: 'Password updated successfully' });
+        res.json({ success: true, message: 'Password updated successfully! You can now log in with your new password.' });
       });
     } catch (error) {
+      console.error('Error hashing new password:', error);
       res.json({ success: false, message: 'Error updating password' });
     }
   });
 });
 
+// Graceful shutdown
+process.on('SIGINT', () => {
+  console.log('Received SIGINT. Closing database connection...');
+  db.close((err) => {
+    if (err) {
+      console.error('Error closing database:', err.message);
+    } else {
+      console.log('Database connection closed.');
+    }
+    process.exit(0);
+  });
+});
+
 app.listen(PORT, () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+  console.log(`🎲 Dicee Battle Server running on port ${PORT}`);
+  console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`Database: ${dbPath}`);
 });

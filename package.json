@@ -8,22 +8,29 @@
     "dev": "nodemon server.js"
   },
   "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "body-parser": "^1.20.2",
+    "compression": "^1.8.0",
     "express": "^4.18.2",
     "express-session": "^1.17.3",
-    "bcryptjs": "^2.4.3",
-    "sqlite3": "^5.1.6",
     "nodemailer": "^6.9.5",
-    "body-parser": "^1.20.2",
-    "path": "^0.12.7"
+    "path": "^0.12.7",
+    "sqlite3": "^5.1.6"
   },
   "devDependencies": {
     "nodemon": "^3.0.1"
+  },
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
   },
   "keywords": [
     "dice",
     "game",
     "authentication",
-    "sqlite"
+    "sqlite",
+    "nodejs",
+    "express"
   ],
   "author": "Vishal Gowrav",
   "license": "MIT"
