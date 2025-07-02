@@ -1,0 +1,24 @@
+name: app
+type: nodejs:18
+
+web:
+    commands:
+        start: npm start
+
+disk: 256
+
+mounts:
+    'uploads':
+        source: local
+        source_path: uploads
+
+build:
+    flavor: none
+
+dependencies:
+    nodejs:
+        npm: "*"
+
+hooks:
+    build: |
+        npm install
