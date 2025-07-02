@@ -6,6 +6,8 @@ const bodyParser = require('body-parser');
 const path = require('path');
 const nodemailer = require('nodemailer');
 const crypto = require('crypto');
+const compression = require('compression');
+const helmet = require('helmet');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -51,13 +53,20 @@ db.serialize(() => {
 // Middleware
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+app.set('trust proxy', 1); // Trust the first proxy hop (Render, Heroku, etc.)
+
+// Security & performance middlewares
+app.use(helmet());
+app.use(compression());
+
 app.use(session({
   secret: process.env.SESSION_SECRET || 'dicee-game-secret-key',
   resave: false,
   saveUninitialized: false,
-  cookie: { 
-    secure: process.env.NODE_ENV === 'production', // Use HTTPS in production
-    maxAge: 24 * 60 * 60 * 1000 // 24 hours
+  cookie: {
+    secure: process.env.NODE_ENV === 'production',
+    sameSite: 'lax',
+    maxAge: 24 * 60 * 60 * 1000
   }
 }));
 

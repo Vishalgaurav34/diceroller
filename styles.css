@@ -214,6 +214,7 @@ body {
     position: relative;
     overflow: hidden;
     width: 100%;
+    flex: 1 1 0;
 }
 
 .player-card::before {

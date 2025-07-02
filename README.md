@@ -219,6 +219,37 @@ MIT License - Feel free to use and modify for your projects.
 
 **Vishal Gowrav** - Enhanced with modern UI and authentication system
 
+## 🛡 Production & Render.com Notes
+
+### Secure Cookies behind a Proxy
+The application now calls `app.set('trust proxy', 1)` and uses **secure cookies** automatically when `NODE_ENV` is set to `production`.  This is important on Render (and other PaaS providers) because traffic arrives via an encrypted proxy.  Without trusting the proxy, the server cannot detect HTTPS and the browser would silently drop the session cookie — leading to symptoms such as:
+
+- Successful sign-up/login responses but immediate redirection back to the login page
+- `GET /api/user` returning `401` even after authentication
+
+If you ever deploy the server behind multiple proxies, adjust the argument to `app.set('trust proxy', N)` accordingly.
+
+### E-mail (Password Reset)
+The password-reset flow uses **Nodemailer**.  In production you must supply SMTP credentials.  The included `render.yaml` already defines placeholder environment variables:
+
+```
+SMTP_HOST       # e.g. smtp.sendgrid.net
+SMTP_PORT       # e.g. 587
+SMTP_USER       # SMTP user / API key
+SMTP_PASS       # SMTP password
+SMTP_SECURE     # "true" if you require TLS
+FROM_EMAIL      # The address that appears in the "From" header
+```
+
+If these values are **not set** the server will gracefully fall back to logging the reset link to the console so testing is still possible without e-mail.
+
+### Extra Performance & Security
+
+- **helmet** adds sensible security headers (HSTS, X-Frame-Options, etc.)
+- **compression** enables gzip/deflate responses for faster load times
+
+Both are enabled automatically and require no extra configuration.
+
 ---
 
 Enjoy playing Dicee Battle! 🎲✨
