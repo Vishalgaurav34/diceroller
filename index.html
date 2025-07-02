@@ -1,33 +1,134 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
-  <head>
-    <meta charset="utf-8">
-    <title>Dicee</title>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dicee - Ultimate Dice Game</title>
     <link rel="stylesheet" href="styles.css">
-    <link href="https://fonts.googleapis.com/css?family=Indie+Flower|Lobster" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&family=Fredoka+One&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="game-container">
+        <!-- Header Section -->
+        <header class="game-header">
+            <h1 class="game-title">🎲 DICEE BATTLE 🎲</h1>
+            <p class="game-subtitle">Roll the dice and claim victory!</p>
+        </header>
 
-  </head>
-  <body>
+        <!-- Game Status -->
+        <div class="game-status">
+            <div class="status-message" id="statusMessage">Click "Roll Dice" to start the battle!</div>
+            <div class="round-counter">Round: <span id="roundCount">0</span></div>
+        </div>
 
-    <div class="container">
-      <h1>Refresh Me</h1>
+        <!-- Players Section -->
+        <div class="players-container">
+            <!-- Player 1 -->
+            <div class="player-card" id="player1">
+                <div class="player-header">
+                    <div class="player-avatar">🧑‍💼</div>
+                    <h2 class="player-name">Player 1</h2>
+                    <div class="crown-container" id="crown1">
+                        <i class="fas fa-crown"></i>
+                    </div>
+                </div>
+                <div class="score-display">
+                    <div class="score-label">Score</div>
+                    <div class="score-value" id="score1">0</div>
+                </div>
+                <div class="dice-container">
+                    <div class="dice-wrapper">
+                        <img class="dice-img" id="dice1" src="images/dice1.png" alt="Player 1 Dice">
+                        <div class="dice-shadow"></div>
+                    </div>
+                </div>
+                <div class="last-roll">
+                    Last roll: <span id="lastRoll1">-</span>
+                </div>
+            </div>
 
-      <div class="dice">
-        <p>Player 1</p>
-        <img class="img1" src="images/dice6.png">
-      </div>
+            <!-- VS Separator -->
+            <div class="vs-separator">
+                <div class="vs-text">VS</div>
+                <div class="lightning">⚡</div>
+            </div>
 
-      <div class="dice">
-        <p>Player 2</p>
-        <img class="img2" src="images/dice6.png">
-      </div>
+            <!-- Player 2 -->
+            <div class="player-card" id="player2">
+                <div class="player-header">
+                    <div class="player-avatar">👩‍💼</div>
+                    <h2 class="player-name">Player 2</h2>
+                    <div class="crown-container" id="crown2">
+                        <i class="fas fa-crown"></i>
+                    </div>
+                </div>
+                <div class="score-display">
+                    <div class="score-label">Score</div>
+                    <div class="score-value" id="score2">0</div>
+                </div>
+                <div class="dice-container">
+                    <div class="dice-wrapper">
+                        <img class="dice-img" id="dice2" src="images/dice1.png" alt="Player 2 Dice">
+                        <div class="dice-shadow"></div>
+                    </div>
+                </div>
+                <div class="last-roll">
+                    Last roll: <span id="lastRoll2">-</span>
+                </div>
+            </div>
+        </div>
 
+        <!-- Game Controls -->
+        <div class="game-controls">
+            <button class="roll-btn" id="rollBtn">
+                <i class="fas fa-dice"></i>
+                <span>Roll Dice</span>
+            </button>
+            <button class="reset-btn" id="resetBtn">
+                <i class="fas fa-redo-alt"></i>
+                <span>New Game</span>
+            </button>
+        </div>
+
+        <!-- Stats Section -->
+        <div class="stats-container">
+            <h3>Game Statistics</h3>
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-label">Player 1 Wins</div>
+                    <div class="stat-value" id="p1Wins">0</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Player 2 Wins</div>
+                    <div class="stat-value" id="p2Wins">0</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Draws</div>
+                    <div class="stat-value" id="draws">0</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Total Games</div>
+                    <div class="stat-value" id="totalGames">0</div>
+                </div>
+            </div>
+        </div>
     </div>
 
-       <script src="index.js" charset="utf-8"></script>
-  </body>
+    <!-- Floating Particles -->
+    <div class="particles">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+    </div>
 
-  <footer>
-    <p> Made with ❤️ by Vishal Gowrav <p> 
-  </footer>
+    <!-- Footer -->
+    <footer class="game-footer">
+        <p>Made with ❤️ by <strong>Vishal Gowrav</strong> | Enhanced with modern UI</p>
+    </footer>
+
+    <script src="index.js"></script>
+</body>
 </html>
