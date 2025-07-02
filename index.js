@@ -35,8 +35,8 @@ const elements = {
 };
 
 // Initialize Game
-function initGame() {
-    loadGameStats();
+async function initGame() {
+    await loadGameStats();
     updateStatsDisplay();
     setupEventListeners();
     resetGame();
@@ -331,16 +331,41 @@ function resetGame() {
     clearWinnerEffects();
 }
 
-// Save Game Stats to Local Storage
-function saveGameStats() {
-    localStorage.setItem('diceeGameStats', JSON.stringify(gameState.gameStats));
+// Save Game Stats to Server
+async function saveGameStats() {
+    try {
+        const response = await fetch('/api/stats', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(gameState.gameStats)
+        });
+        
+        const result = await response.json();
+        if (!result.success) {
+            console.error('Error saving stats:', result.message);
+        }
+    } catch (error) {
+        console.error('Error saving stats:', error);
+    }
 }
 
-// Load Game Stats from Local Storage
-function loadGameStats() {
-    const savedStats = localStorage.getItem('diceeGameStats');
-    if (savedStats) {
-        gameState.gameStats = JSON.parse(savedStats);
+// Load Game Stats from Server
+async function loadGameStats() {
+    try {
+        const response = await fetch('/api/stats');
+        const result = await response.json();
+        
+        if (result.success) {
+            gameState.gameStats = result.stats;
+        } else {
+            console.error('Error loading stats:', result.message);
+            // Keep default stats if error
+        }
+    } catch (error) {
+        console.error('Error loading stats:', error);
+        // Keep default stats if error
     }
 }
 
@@ -399,8 +424,8 @@ function setupAuthListeners() {
 }
 
 // Initialize the game when page loads
-document.addEventListener('DOMContentLoaded', () => {
-    initGame();
+document.addEventListener('DOMContentLoaded', async () => {
+    await initGame();
     loadUserInfo();
     setupAuthListeners();
 });

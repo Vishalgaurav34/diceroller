@@ -20,6 +20,18 @@ db.serialize(() => {
     password TEXT NOT NULL,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP
   )`);
+  
+  // Create game_stats table for user-specific statistics
+  db.run(`CREATE TABLE IF NOT EXISTS game_stats (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    player1_wins INTEGER DEFAULT 0,
+    player2_wins INTEGER DEFAULT 0,
+    draws INTEGER DEFAULT 0,
+    total_games INTEGER DEFAULT 0,
+    FOREIGN KEY (user_id) REFERENCES users (id),
+    UNIQUE(user_id)
+  )`);
 });
 
 // Middleware
@@ -148,6 +160,62 @@ app.get('/api/user', requireAuth, (req, res) => {
       username: req.session.username 
     } 
   });
+});
+
+// Get user's game statistics
+app.get('/api/stats', requireAuth, (req, res) => {
+  const userId = req.session.userId;
+  
+  db.get('SELECT * FROM game_stats WHERE user_id = ?', [userId], (err, stats) => {
+    if (err) {
+      res.json({ success: false, message: 'Error fetching stats' });
+    } else if (!stats) {
+      // Create default stats for new user
+      res.json({ 
+        success: true, 
+        stats: {
+          player1Wins: 0,
+          player2Wins: 0,
+          draws: 0,
+          totalGames: 0
+        }
+      });
+    } else {
+      res.json({ 
+        success: true, 
+        stats: {
+          player1Wins: stats.player1_wins,
+          player2Wins: stats.player2_wins,
+          draws: stats.draws,
+          totalGames: stats.total_games
+        }
+      });
+    }
+  });
+});
+
+// Save user's game statistics
+app.post('/api/stats', requireAuth, (req, res) => {
+  const userId = req.session.userId;
+  const { player1Wins, player2Wins, draws, totalGames } = req.body;
+  
+  if (typeof player1Wins !== 'number' || typeof player2Wins !== 'number' || 
+      typeof draws !== 'number' || typeof totalGames !== 'number') {
+    return res.json({ success: false, message: 'Invalid stats data' });
+  }
+  
+  // Use INSERT OR REPLACE to handle both new and existing records
+  db.run(`INSERT OR REPLACE INTO game_stats 
+          (user_id, player1_wins, player2_wins, draws, total_games) 
+          VALUES (?, ?, ?, ?, ?)`, 
+    [userId, player1Wins, player2Wins, draws, totalGames], 
+    function(err) {
+      if (err) {
+        res.json({ success: false, message: 'Error saving stats' });
+      } else {
+        res.json({ success: true, message: 'Stats saved successfully' });
+      }
+    });
 });
 
 app.listen(PORT, () => {
