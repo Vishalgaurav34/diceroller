@@ -1,17 +1,18 @@
 services:
   # Web service for the dice game
   - type: web
-    name: dicee-game
+    name: dicee-battle-game
     env: node
     plan: free
     buildCommand: npm install
-    startCommand: node server.js
+    startCommand: npm start
     envVars:
       - key: NODE_ENV
         value: production
       - key: SESSION_SECRET
         generateValue: true
-      # SMTP configuration for password reset emails (set these in Render dashboard)
+      # SMTP configuration for password reset emails
+      # Set these in Render dashboard for email functionality
       - key: SMTP_HOST
         sync: false
       - key: SMTP_PORT
@@ -23,11 +24,30 @@ services:
       - key: SMTP_SECURE
         value: "false"
       - key: FROM_EMAIL
-        value: "no-reply@example.com"
+        value: "noreply@dicee-battle.onrender.com"
+      # Performance optimizations
+      - key: NODE_OPTIONS
+        value: "--max-old-space-size=512"
     # Health check endpoint
-    healthCheckPath: /
+    healthCheckPath: /health
     # Auto-deploy from main branch
     autoDeploy: true
+    # Disk space (for SQLite database in /tmp)
+    disk:
+      name: dicee-data
+      mountPath: /tmp
+      sizeGB: 1
+    # Custom headers for better security
+    headers:
+      - path: /*
+        name: X-Content-Type-Options
+        value: nosniff
+      - path: /*
+        name: X-Frame-Options
+        value: DENY
+      - path: /*
+        name: X-XSS-Protection
+        value: "1; mode=block"
 
 databases:
   # SQLite database will be handled by the application
