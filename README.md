@@ -158,6 +158,49 @@ The game is fully responsive and optimized for mobile devices with:
 - Optimized animations for mobile performance
 - Adaptive text sizing
 
+## 🚀 Deployment
+
+### Deploy to Render
+
+This project includes a `render.yaml` file for easy deployment to Render:
+
+1. **Push your code** to a GitHub repository
+2. **Connect to Render**:
+   - Go to [render.com](https://render.com)
+   - Sign up/login and connect your GitHub account
+   - Click "New" → "Blueprint"
+   - Select your repository
+3. **Deploy**: Render will automatically use the `render.yaml` configuration
+4. **Access your app**: Your app will be available at the provided Render URL
+
+### Manual Deployment Steps
+
+If deploying manually:
+
+1. **Create a Web Service** on Render
+2. **Connect your repository**
+3. **Configure build settings**:
+   - Build Command: `npm install`
+   - Start Command: `node server.js`
+4. **Set environment variables**:
+   - `NODE_ENV`: `production`
+   - `SESSION_SECRET`: (generate a secure random string)
+5. **Deploy**
+
+### Environment Variables
+
+For production deployment, make sure to set:
+- `NODE_ENV=production`
+- `SESSION_SECRET` (secure random string)
+- `PORT` (automatically set by most hosting platforms)
+
+### Production Considerations
+
+- SQLite database is suitable for small applications
+- For larger scale, consider upgrading to PostgreSQL
+- The app automatically handles HTTPS redirects in production
+- Session cookies are secured automatically in production mode
+
 ## 🎯 Future Enhancements
 
 - [ ] Multiplayer support with WebSockets
