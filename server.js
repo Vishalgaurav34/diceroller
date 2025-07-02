@@ -6,7 +6,7 @@ const bodyParser = require('body-parser');
 const path = require('path');
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 // Database setup
 const db = new sqlite3.Database('./users.db');
@@ -26,7 +26,7 @@ db.serialize(() => {
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(session({
-  secret: 'dicee-game-secret-key',
+  secret: process.env.SESSION_SECRET || 'dicee-game-secret-key-change-in-production',
   resave: false,
   saveUninitialized: false,
   cookie: { secure: false } // Set to true if using HTTPS
