@@ -165,14 +165,25 @@ function determineWinner(roll1, roll2) {
         message = `🏆 Player 1 wins this round! (${roll1} vs ${roll2})`;
         winner = 1;
         showWinnerEffects(1);
+        // Update round wins in statistics
+        gameState.gameStats.player1Wins++;
     } else if (roll2 > roll1) {
         message = `🏆 Player 2 wins this round! (${roll2} vs ${roll1})`;
         winner = 2;
         showWinnerEffects(2);
+        // Update round wins in statistics
+        gameState.gameStats.player2Wins++;
     } else {
         message = `🤝 It's a draw! Both rolled ${roll1}`;
         showDrawEffect();
+        // Update draws in statistics
+        gameState.gameStats.draws++;
     }
+    
+    // Update total games and display
+    gameState.gameStats.totalGames++;
+    updateStatsDisplay();
+    saveGameStats();
     
     elements.statusMessage.textContent = message;
     
@@ -280,17 +291,10 @@ function announceGameWinner(winner) {
     }, 3000);
 }
 
-// Update Game Statistics
+// Update Game Statistics (for full game wins - 50 points)
 function updateGameStats(winner) {
-    if (winner === 1) {
-        gameState.gameStats.player1Wins++;
-    } else if (winner === 2) {
-        gameState.gameStats.player2Wins++;
-    } else {
-        gameState.gameStats.draws++;
-    }
-    gameState.gameStats.totalGames++;
-    
+    // This function is called when someone wins the full game (reaches 50 points)
+    // Individual round wins are already tracked in determineWinner function
     updateStatsDisplay();
     saveGameStats();
 }
