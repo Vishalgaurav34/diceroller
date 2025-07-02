@@ -1,0 +1,27 @@
+services:
+  # Web service for the dice game
+  - type: web
+    name: dicee-game
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      - key: SESSION_SECRET
+        generateValue: true
+    # Health check endpoint
+    healthCheckPath: /
+    # Auto-deploy from main branch
+    autoDeploy: true
+
+databases:
+  # SQLite database will be handled by the application
+  # Note: For production, consider using Render's PostgreSQL service
+  # - name: dicee-db
+  #   databaseName: dicee_game
+  #   user: dicee_user
+  #   plan: free
