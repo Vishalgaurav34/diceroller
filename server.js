@@ -43,6 +43,9 @@ db.serialize(() => {
     expires_at DATETIME NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users (id)
   )`);
+
+  // Ensure each user has at most one active reset token
+  db.run('CREATE UNIQUE INDEX IF NOT EXISTS idx_password_resets_user_id ON password_resets(user_id)');
 });
 
 // Middleware
